@@ -32,7 +32,6 @@ namespace MelonLoader
 
         public static void Msg(object obj) => NativeMsg(DefaultMelonColor, DefaultTextColor, null, obj.ToString());
         public static void Msg(string txt) => NativeMsg(DefaultMelonColor, DefaultTextColor, null, txt);
-        public static void Msg(string txt, params object[] args) => NativeMsg(DefaultMelonColor, DefaultTextColor, null, string.Format(txt, args));
 
         public static void Msg(ConsoleColor txt_color, object obj) => NativeMsg(DefaultMelonColor, ConsoleColorToDrawingColor(txt_color), null, obj.ToString());
         public static void Msg(ConsoleColor txt_color, string txt) => NativeMsg(DefaultMelonColor, ConsoleColorToDrawingColor(txt_color), null, txt);
@@ -43,22 +42,25 @@ namespace MelonLoader
         
         public static void Msg(Color txt_color, object obj) => NativeMsg(DefaultMelonColor, txt_color, null, obj.ToString());
         public static void Msg(Color txt_color, string txt) => NativeMsg(DefaultMelonColor, txt_color, null, txt);
-        public static void Msg(Color txt_color, string txt, params object[] args) => NativeMsg(DefaultMelonColor, txt_color, null, string.Format(txt, args));
 
 
         public static void Warning(object obj) => NativeWarning(null, obj.ToString());
         public static void Warning(string txt) => NativeWarning(null, txt);
-        public static void Warning(string txt, params object[] args) => NativeWarning(null, string.Format(txt, args));
 
 
         public static void Error(object obj) => NativeError(null, obj.ToString());
         public static void Error(string txt) => NativeError(null, txt);
-        public static void Error(string txt, params object[] args) => NativeError(null, string.Format(txt, args));
         public static void Error(string txt, Exception ex) => NativeError(null, $"{txt}\n{ex}");
 
         public static void WriteLine(int length = 30) => MsgDirect(new string('-', length));
         public static void WriteLine(Color color, int length = 30) => MsgDirect(color, new string('-', length));
-        
+
+        // Changed to display the specific mod's name
+        public static void Msg(string txt, params object[] args) => NativeMsg(DefaultMelonColor, DefaultTextColor, txt, args[0] as string);
+        public static void Warning(string txt, params object[] args) => NativeWarning(txt, args[0] as string);
+        public static void Error(string txt, params object[] args) => NativeError(txt, args[0] as string);
+        public static void Msg(Color txt_color, string txt, params object[] args) => NativeMsg(DefaultMelonColor, txt_color, txt, args[0] as string);
+
         private static void NativeMsg(Color namesection_color, Color txt_color, string namesection, string txt, bool skipStackWalk = false)
         {
             if (string.IsNullOrEmpty(namesection))
