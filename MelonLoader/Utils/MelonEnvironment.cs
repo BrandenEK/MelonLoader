@@ -32,10 +32,10 @@ namespace MelonLoader.Utils
         public static string SupportModuleDirectory => Path.Combine(DependenciesDirectory, "SupportModules");
         public static string CompatibilityLayerDirectory => Path.Combine(DependenciesDirectory, "CompatibilityLayers");
         public static string Il2CppAssemblyGeneratorDirectory => Path.Combine(DependenciesDirectory, "Il2CppAssemblyGenerator");
-        public static string ModsDirectory => Path.Combine(MelonBaseDirectory, "Mods");
-        public static string PluginsDirectory => Path.Combine(MelonBaseDirectory, "Plugins");
-        public static string UserLibsDirectory => Path.Combine(MelonBaseDirectory, "UserLibs");
-        public static string UserDataDirectory => Path.Combine(MelonBaseDirectory, "UserData");
+        public static string ModsDirectory => Path.Combine(GameRootDirectory, "Modding\\plugins");
+        public static string PluginsDirectory => Path.Combine(MelonLoaderDirectory, "Documentation");
+        public static string UserLibsDirectory => Path.Combine(MelonLoaderDirectory, "Documentation");
+        public static string UserDataDirectory => Path.Combine(MelonLoaderDirectory, "Documentation");
         public static string OurRuntimeDirectory => Path.Combine(MelonLoaderDirectory, OurRuntimeName);
 
         public static string GameExecutableName => Path.GetFileNameWithoutExtension(GameExecutablePath);
