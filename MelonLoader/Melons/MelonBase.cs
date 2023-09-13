@@ -300,7 +300,34 @@ namespace MelonLoader
                     result.Add(Incompatibility.MLBuild);
             }
 
+            string[] requiredMods = OptionalDependencies?.AssemblyNames ?? new string[0];
+            if (requiredMods.Length > 0)
+            {
+                if (requiredMods.Length % 2 != 0)
+                    result.Add(Incompatibility.RequiredMod);
+
+                for (int i = 0; i < requiredMods.Length; i += 2)
+                {
+                    string modName = requiredMods[i];
+                    Version modVersion = new Version(requiredMods[i + 1]);
+
+                    if (!FindModWithVersion(modName, modVersion))
+                        result.Add(Incompatibility.RequiredMod);
+                }
+            }
+
             return result.ToArray();
+        }
+
+        private bool FindModWithVersion(string modName, Version modVersion)
+        {
+            foreach (MelonBase melon in _registeredMelons)
+            {
+                if (melon.Info.Name == modName && new Version(melon.Info.Version) >= modVersion)
+                    return true;
+            }
+
+            return false;
         }
 
         public Incompatibility[] FindIncompatiblitiesFromContext()
@@ -335,6 +362,19 @@ namespace MelonLoader
 
                 foreach (var p in melon.SupportedProcesses)
                     MelonLogger.MsgDirect($"    - '{p.EXE_Name}'");
+            }
+            if (incompatibilities.Contains(Incompatibility.RequiredMod))
+            {
+                MelonLogger.MsgDirect($"- {melon.Info.Name} is missing one of the following required mods:");
+
+                string[] requiredMods = melon.OptionalDependencies.AssemblyNames;
+                if (requiredMods.Length % 2 != 0)
+                    MelonLogger.MsgDirect($"    - Invalid version syntax");
+
+                for (int i = 0; i < requiredMods.Length; i += 2)
+                {
+                    MelonLogger.MsgDirect($"    - {requiredMods[i]} v{requiredMods[i + 1]}");
+                }
             }
             if (incompatibilities.Contains(Incompatibility.Platform))
             {
@@ -653,7 +693,8 @@ namespace MelonLoader
             GameVersion,
             ProcessName,
             Domain,
-            Platform
+            Platform,
+            RequiredMod,
         }
     }
 }
