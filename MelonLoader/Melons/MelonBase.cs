@@ -304,15 +304,19 @@ namespace MelonLoader
             if (requiredMods.Length > 0)
             {
                 if (requiredMods.Length % 2 != 0)
-                    result.Add(Incompatibility.RequiredMod);
-
-                for (int i = 0; i < requiredMods.Length; i += 2)
                 {
-                    string modName = requiredMods[i];
-                    Version modVersion = new Version(requiredMods[i + 1]);
+                    result.Add(Incompatibility.RequiredMod);
+                }
+                else
+                {
+                    for (int i = 0; i < requiredMods.Length; i += 2)
+                    {
+                        string modName = requiredMods[i];
+                        Version modVersion = new Version(requiredMods[i + 1]);
 
-                    if (FindMelon(modName, modVersion) == null)
-                        result.Add(Incompatibility.RequiredMod);
+                        if (FindMelon(modName, modVersion) == null)
+                            result.Add(Incompatibility.RequiredMod);
+                    }
                 }
             }
 
@@ -358,10 +362,14 @@ namespace MelonLoader
 
                 string[] requiredMods = melon.OptionalDependencies.AssemblyNames;
                 if (requiredMods.Length % 2 != 0)
+                {
                     MelonLogger.MsgDirect($"    - Invalid version syntax");
-
-                for (int i = 0; i < requiredMods.Length; i += 2)
-                    MelonLogger.MsgDirect($"    - {requiredMods[i]} v{requiredMods[i + 1]}");
+                }
+                else
+                {
+                    for (int i = 0; i < requiredMods.Length; i += 2)
+                        MelonLogger.MsgDirect($"    - {requiredMods[i]} v{requiredMods[i + 1]}");
+                }
             }
             if (incompatibilities.Contains(Incompatibility.Platform))
             {
