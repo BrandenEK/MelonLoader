@@ -65,7 +65,7 @@ namespace MelonLoader
             var collection = melons.ToList();
             SortMelons(ref collection);
 
-            foreach (var m in melons)
+            foreach (var m in collection)
                 m.Register();
         }
 
@@ -311,23 +311,12 @@ namespace MelonLoader
                     string modName = requiredMods[i];
                     Version modVersion = new Version(requiredMods[i + 1]);
 
-                    if (!FindModWithVersion(modName, modVersion))
+                    if (FindMelon(modName, modVersion) == null)
                         result.Add(Incompatibility.RequiredMod);
                 }
             }
 
             return result.ToArray();
-        }
-
-        private bool FindModWithVersion(string modName, Version modVersion)
-        {
-            foreach (MelonBase melon in _registeredMelons)
-            {
-                if (melon.Info.Name == modName && new Version(melon.Info.Version) >= modVersion)
-                    return true;
-            }
-
-            return false;
         }
 
         public Incompatibility[] FindIncompatiblitiesFromContext()
@@ -365,16 +354,14 @@ namespace MelonLoader
             }
             if (incompatibilities.Contains(Incompatibility.RequiredMod))
             {
-                MelonLogger.MsgDirect($"- {melon.Info.Name} is missing one of the following required mods:");
+                MelonLogger.MsgDirect($"- {melon.Info.Name} is missing one or more of the following required mods:");
 
                 string[] requiredMods = melon.OptionalDependencies.AssemblyNames;
                 if (requiredMods.Length % 2 != 0)
                     MelonLogger.MsgDirect($"    - Invalid version syntax");
 
                 for (int i = 0; i < requiredMods.Length; i += 2)
-                {
                     MelonLogger.MsgDirect($"    - {requiredMods[i]} v{requiredMods[i + 1]}");
-                }
             }
             if (incompatibilities.Contains(Incompatibility.Platform))
             {
@@ -524,6 +511,11 @@ namespace MelonLoader
         public static MelonBase FindMelon(string melonName, string melonAuthor)
         {
             return _registeredMelons.Find(x => x.Info.Name == melonName && x.Info.Author == melonAuthor);
+        }
+
+        public static MelonBase FindMelon(string melonName, Version melonVersion)
+        {
+            return _registeredMelons.Find(x => x.Info.Name == melonName && new Version(x.Info.Version) >= melonVersion);
         }
 
         /// <summary>

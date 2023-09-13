@@ -110,10 +110,6 @@ namespace MelonLoader.InternalUtils
                     melonsWithIncompatibilities.Add(melonVertex.melon.Info.Name, incompatibilities.ToArray());
             }
 
-            // Some Melons are missing dependencies. Don't load these Melons and show an error message
-            if (melonsWithMissingDeps.Count > 0)
-                MelonLogger.Warning(BuildMissingDependencyMessage(melonsWithMissingDeps));
-
             if (melonsWithIncompatibilities.Count > 0)
                 MelonLogger.Warning(BuildIncompatibleAssembliesMessage(melonsWithIncompatibilities));
         }
