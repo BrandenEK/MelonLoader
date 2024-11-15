@@ -30,7 +30,7 @@ impl std::convert::TryFrom<u8> for LogLevel {
 
 macro_rules! log_path {
     () => {
-        std::env::current_dir()?.join("MelonLoader").join("Latest-Bootstrap.log")
+        $crate::melonenv::paths::BASE_DIR.clone().join("MelonLoader").join("Latest-Bootstrap.log")
     };
 }
 
@@ -86,7 +86,7 @@ pub fn log_console_file(level: LogLevel, message: &str) -> Result<(), LogError> 
 
             let file_string = format!("[{}] [WARNING] {}", timestamp(), message);
 
-            println!("{}", console_string.bright_yellow());
+            println!("{}", console_string.color(constants::YELLOW));
 
             write(&file_string).map_err(|_| LogError::FailedToWriteToLog)?;
         }

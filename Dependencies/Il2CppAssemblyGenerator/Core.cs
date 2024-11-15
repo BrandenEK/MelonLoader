@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using MelonLoader.Il2CppAssemblyGenerator.Packages;
+using MelonLoader.Il2CppAssemblyGenerator.Packages.Models;
 using MelonLoader.Modules;
 using MelonLoader.Utils;
 
@@ -16,7 +17,9 @@ namespace MelonLoader.Il2CppAssemblyGenerator
 
         internal static HttpClient webClient = null;
 
-        internal static Packages.Models.ExecutablePackage dumper = null;
+        internal static ExecutablePackage cpp2il = null;
+        internal static Cpp2IL_StrippedCodeRegSupport cpp2il_scrs = null;
+
         internal static Packages.Il2CppInterop il2cppinterop = null;
         internal static UnityDependencies unitydependencies = null;
         internal static DeobfuscationMap deobfuscationMap = null;
@@ -54,18 +57,26 @@ namespace MelonLoader.Il2CppAssemblyGenerator
         {
             Config.Initialize();
 
-            dumper = new Cpp2IL();
+            Cpp2IL cpp2IL_netcore = new Cpp2IL();
+            if (MelonUtils.IsWindows
+                && (cpp2IL_netcore.VersionSem < Cpp2IL.NetCoreMinVersion))
+                cpp2il = new Cpp2IL_NetFramework();
+            else
+                cpp2il = cpp2IL_netcore;
+
+            //cpp2il_scrs = new Cpp2IL_StrippedCodeRegSupport(cpp2il);
             il2cppinterop = new Packages.Il2CppInterop();
             unitydependencies = new UnityDependencies();
             deobfuscationMap = new DeobfuscationMap();
             deobfuscationRegex = new DeobfuscationRegex();
 
-            Logger.Msg($"Using Dumper Version: {(string.IsNullOrEmpty(dumper.Version) ? "null" : dumper.Version)}");
+            Logger.Msg($"Using Cpp2IL Version: {(string.IsNullOrEmpty(cpp2il.Version) ? "null" : cpp2il.Version)}");
             Logger.Msg($"Using Il2CppInterop Version = {(string.IsNullOrEmpty(il2cppinterop.Version) ? "null" : il2cppinterop.Version)}");
             Logger.Msg($"Using Unity Dependencies Version = {(string.IsNullOrEmpty(unitydependencies.Version) ? "null" : unitydependencies.Version)}");
             Logger.Msg($"Using Deobfuscation Regex = {(string.IsNullOrEmpty(deobfuscationRegex.Regex) ? "null" : deobfuscationRegex.Regex)}");
 
-            if (!dumper.Setup()
+            if (!cpp2il.Setup()
+                //|| !cpp2il_scrs.Setup()
                 || !il2cppinterop.Setup()
                 || !unitydependencies.Setup()
                 || !deobfuscationMap.Setup())
@@ -76,7 +87,7 @@ namespace MelonLoader.Il2CppAssemblyGenerator
             string CurrentGameAssemblyHash;
             Logger.Msg("Checking GameAssembly...");
             MelonDebug.Msg($"Last GameAssembly Hash: {Config.Values.GameAssemblyHash}");
-            MelonDebug.Msg($"Current GameAssembly Hash: {CurrentGameAssemblyHash = FileHandler.Hash(GameAssemblyPath)}");
+            MelonDebug.Msg($"Current GameAssembly Hash: {CurrentGameAssemblyHash = MelonUtils.ComputeSimpleSHA512Hash(GameAssemblyPath)}");
 
             if (string.IsNullOrEmpty(Config.Values.GameAssemblyHash)
                     || !Config.Values.GameAssemblyHash.Equals(CurrentGameAssemblyHash))
@@ -89,18 +100,18 @@ namespace MelonLoader.Il2CppAssemblyGenerator
             }
             Logger.Msg("Assembly Generation Needed!");
 
-            dumper.Cleanup();
+            cpp2il.Cleanup();
             il2cppinterop.Cleanup();
 
-            if (!dumper.Execute())
+            if (!cpp2il.Execute())
             {
-                dumper.Cleanup();
+                cpp2il.Cleanup();
                 return 1;
             }
 
             if (!il2cppinterop.Execute())
             {
-                dumper.Cleanup();
+                cpp2il.Cleanup();
                 il2cppinterop.Cleanup();
                 return 1;
             }
@@ -108,7 +119,7 @@ namespace MelonLoader.Il2CppAssemblyGenerator
             OldFiles_Cleanup();
             OldFiles_LAM();
 
-            dumper.Cleanup();
+            cpp2il.Cleanup();
             il2cppinterop.Cleanup();
 
             Logger.Msg("Assembly Generation Successful!");

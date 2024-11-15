@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using System;
 
 namespace MelonLoader.Support
 {
@@ -8,23 +9,33 @@ namespace MelonLoader.Support
     {
         private static void Initialize()
         {
-            string ManagedFolder = string.Copy(GetManagedDirectory());
+            if (Environment.Version >= new Version("3.0.0.0"))
+                return;
 
-            string SystemPath = Path.Combine(ManagedFolder, "System.dll");
-            if (!File.Exists(SystemPath))
-                File.WriteAllBytes(SystemPath, Properties.Resources.System);
+            var ownDir = typeof(Preload).Assembly.Location;
+            if (string.IsNullOrEmpty(ownDir))
+                return;
 
-            string SystemCorePath = Path.Combine(ManagedFolder, "System.Core.dll");
-            if (!File.Exists(SystemCorePath))
-                File.WriteAllBytes(SystemCorePath, Properties.Resources.System_Core);
+            ownDir = Path.GetDirectoryName(ownDir);
 
-            string SystemDrawingPath = Path.Combine(ManagedFolder, "System.Drawing.dll");
-            if (!File.Exists(SystemDrawingPath))
-                File.WriteAllBytes(SystemDrawingPath, Properties.Resources.System_Drawing);
+            var managedFolder = GetManagedDirectory();
+
+            var patchesDir = Path.Combine(ownDir, "NetStandardPatches");
+            if (!Directory.Exists(patchesDir))
+                return;
+
+            foreach (var patch in Directory.GetFiles(patchesDir))
+            {
+                try
+                {
+                    File.Copy(patch, Path.Combine(managedFolder, Path.GetFileName(patch)), true);
+                }
+                catch { }
+            }
         }
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         [return: MarshalAs(UnmanagedType.LPStr)]
-        private extern static string GetManagedDirectory();
+        private static extern string GetManagedDirectory();
     }
 }

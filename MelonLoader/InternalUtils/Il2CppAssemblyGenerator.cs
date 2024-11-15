@@ -1,4 +1,5 @@
-﻿using MelonLoader.Modules;
+﻿#if NET6_0_OR_GREATER
+using MelonLoader.Modules;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -10,7 +11,7 @@ namespace MelonLoader.InternalUtils
     internal static class Il2CppAssemblyGenerator
     {
         public static readonly MelonModule.Info moduleInfo = new MelonModule.Info(
-            $"MelonLoader{Path.DirectorySeparatorChar}Dependencies{Path.DirectorySeparatorChar}Il2CppAssemblyGenerator{Path.DirectorySeparatorChar}Il2CppAssemblyGenerator.dll"
+            $"{MelonEnvironment.GameRootDirectory}{Path.DirectorySeparatorChar}MelonLoader{Path.DirectorySeparatorChar}Dependencies{Path.DirectorySeparatorChar}Il2CppAssemblyGenerator{Path.DirectorySeparatorChar}Il2CppAssemblyGenerator.dll"
             , () => !MelonUtils.IsGameIl2Cpp());
 
         internal static bool Run()
@@ -36,3 +37,4 @@ namespace MelonLoader.InternalUtils
         }
     }
 }
+#endif
